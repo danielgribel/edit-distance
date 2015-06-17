@@ -1,6 +1,10 @@
 # authors: Daniel Gribel, Joao Paulo Forny
 
 import numpy as np
+import random
+import time
+
+start_time = time.time()
 
 def init_memory(m, n, delta, alpha):
 	M = np.zeros((m, n))
@@ -12,7 +16,8 @@ def init_memory(m, n, delta, alpha):
 
 	return M
 
-def sequence_alignment(x, y, delta, alpha):
+# get alignment cost: O(n^2)
+def get_alignment_cost(x, y, delta, alpha):
 	m = len(x)
 	n = len(y)
 	M = init_memory(m+1, n+1, delta, alpha)
@@ -28,27 +33,31 @@ def sequence_alignment(x, y, delta, alpha):
 	print M[m, n]
 	return M
 
-def find_sequence(M, i, j, x, y, delta, alpha):
-	if i == 0 or j == 0:
-		return
-	else:
+# find sequence: O(2n)
+def find_sequence_iterative(M, i, j, x, y, delta, alpha):
+	while(i != 0 and j != 0):
 		mismatch = M[i-1, j-1]
 		if x[i-1] != y[j-1]:
 			mismatch = mismatch + alpha
 		if M[i, j] == mismatch:
-			print(x[i-1], y[j-1])
-			return find_sequence(M, i-1, j-1, x, y, delta, alpha)
+			#print(x[i-1], y[j-1])
+			i = i-1
+			j = j-1
 		else:
 			if M[i,j] == delta + M[i-1, j]:
-				return find_sequence(M, i-1, j, x, y, delta, alpha)
+				i = i-1
 			else:
-				return find_sequence(M, i, j-1, x, y, delta, alpha)
+				j = j-1
 
-x = "sapo"
-y = "pato"
+alphabet = "abcd"
+string_length = 10 * pow(2,7)
+x = [random.choice(alphabet) for _ in range(string_length)]
+y = [random.choice(alphabet) for _ in range(string_length)]
 
 delta = 0.7
 alpha = 1
-M = sequence_alignment(x, y, delta, alpha)
-print M
-find_sequence(M, len(x), len(y), x, y, delta, alpha)
+M = get_alignment_cost(x, y, delta, alpha)
+#print M
+find_sequence_iterative(M, len(x), len(y), x, y, delta, alpha)
+
+print(time.time() - start_time)
