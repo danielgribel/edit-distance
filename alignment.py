@@ -73,20 +73,49 @@ def find_sequence_iterative(M, i, j, x, y, delta, alpha):
 			else:
 				j = j-1
 
+# find sequence for linear storage
+def divide_conquer_alignment(x, y, delta, alpha):
+	m = len(x)
+	n = len(y)
+	if m <= 2 or n <= 2:
+		M = get_cost_quad(x, y, delta, alpha)
+		find_sequence_iterative(M, x, y, delta, alpha)
+		return
+
+	f_alignment = get_cost_linear(x, y[:(n/2)], delta, alpha)[1:]
+	# problem is here, on backward alignment!
+	b_alignment = get_cost_linear(x, y[(n/2):], delta, alpha)[1:]
+	
+	sum_alignments = [a + b for a, b in zip(f_alignment, b_alignment)]
+	q = sum_alignments.index(min(sum_alignments))
+	
+	print(x[q], y[(n/2)-1])
+
+	divide_conquer_alignment(x[:q], y[:(n/2)], delta, alpha)
+	divide_conquer_alignment(x[q:], y[(n/2):], delta, alpha)
+
+
 delta = 0.7
 alpha = 1
 alphabet = "abcd"
 
-for i in range(0, 1):
-	for j in range(0, 10):
+x = "mean"
+y = "name"
 
-		string_length = 10 * pow(2, i+1)
-		
-		x = [random.choice(alphabet) for _ in range(string_length)]
-		y = [random.choice(alphabet) for _ in range(string_length)]
-		
-		M1 = get_cost_quad(x, y, delta, alpha)
-		M2 = get_cost_linear(x, y, delta, alpha)
-		find_sequence_iterative(M1, len(x), len(y), x, y, delta, alpha)
+cost = get_cost_linear(x, y, delta, alpha)
+print cost
+
+# genarating multiple instances
+#for i in range(0, 1):
+#	for j in range(0, 10):
+#
+#		string_length = 10 * pow(2, i+1)
+#		
+#		x = [random.choice(alphabet) for _ in range(string_length)]
+#		y = [random.choice(alphabet) for _ in range(string_length)]
+#		
+#		M1 = get_cost_quad(x, y, delta, alpha)
+#		M2 = get_cost_linear(x, y, delta, alpha)
+#		find_sequence_iterative(M1, len(x), len(y), x, y, delta, alpha)
 
 print(time.time() - start_time)
