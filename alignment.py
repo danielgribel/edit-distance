@@ -17,11 +17,11 @@ def init_memory_quad(m, n, delta):
 	return M
 
 def init_memory_linear(m, delta):
-	CURRENT = [0 for i in range(m)]
+	current = [0 for i in range(m)]
 	for i in range(0, m):
-		CURRENT[i] = i*delta
+		current[i] = i*delta
 
-	return CURRENT
+	return current
 
 # get cost in quadratic space: O(n^2) time, O(n^2) space
 def get_cost_quad(x, y, delta, alpha):
@@ -44,18 +44,18 @@ def get_cost_linear(x, y, delta, alpha):
 	m = len(x)
 	n = len(y)
 
-	CURRENT = init_memory_linear(m+1, delta)
+	current = init_memory_linear(m+1, delta)
 
 	for j in range(1, n+1):
-		LAST = copy.copy(CURRENT)
-		CURRENT[0] = j*delta
+		last = copy.copy(current)
+		current[0] = j*delta
 		for i in range(1, m+1):
-			mismatch = LAST[i-1]
+			mismatch = last[i-1]
 			if x[i-1] != y[j-1]:
 				mismatch = mismatch + alpha
-			CURRENT[i] = min(mismatch, delta + LAST[i], delta + CURRENT[i-1])
+			current[i] = min(mismatch, delta + last[i], delta + current[i-1])
 
-	return CURRENT
+	return current
 
 # find sequence for quadratic storage: O(2n) time, O(n^2) space
 def find_sequence_iterative(M, x, y, delta, alpha):
@@ -66,9 +66,9 @@ def find_sequence_iterative(M, x, y, delta, alpha):
 		if x[i-1] != y[j-1]:
 			mismatch = mismatch + alpha
 		if M[i, j] == mismatch:
-			print(x[i-1], y[j-1])
 			i = i-1
 			j = j-1
+			alignment.append( (x[i], y[j]) )
 		else:
 			if M[i,j] == delta + M[i-1, j]:
 				i = i-1
@@ -81,8 +81,7 @@ def divide_conquer_alignment(x, y, delta, alpha):
 	n = len(y)
 	if m <= 2 or n <= 2:
 		M = get_cost_quad(x, y, delta, alpha)
-		find_sequence_iterative(M, x, y, delta, alpha)
-		return
+		return find_sequence_iterative(M, x, y, delta, alpha)
 
 	else:
 		f_alignment = get_cost_linear(x, y[:(n/2)], delta, alpha)
@@ -90,9 +89,6 @@ def divide_conquer_alignment(x, y, delta, alpha):
 		
 		sum_alignments = [a + b for a, b in zip(f_alignment, b_alignment[::-1])]
 		q = sum_alignments.index(min(sum_alignments))
-		
-		if(q > 0):
-			print(x[q-1], y[(n/2)-1])
 
 		divide_conquer_alignment(x[:q], y[:(n/2)], delta, alpha)
 		divide_conquer_alignment(x[q:], y[(n/2):], delta, alpha)
@@ -102,30 +98,47 @@ delta = 0.7
 alpha = 1
 alphabet = "abcd"
 
-x = "mean"
-y = "name"
+# x = "mean"
+# y = "name"
 
-M1 = get_cost_linear(x, y, delta, alpha)
-print 'alignment cost:', M1[len(x)]
-divide_conquer_alignment(x, y, delta, alpha)
+# alignment = list()
+# M1 = get_cost_linear(x, y, delta, alpha)
+# divide_conquer_alignment(x, y, delta, alpha)
+# print 'alignment cost:', M1[len(x)]
+# print alignment
 
-print '---------------------'
+# print '---------------------'
 
-M2 = get_cost_quad(x, y, delta, alpha)
-print 'alignment cost:', M2[len(x), len(y)]
-find_sequence_iterative(M2, x, y, delta, alpha)
+# alignment = list()
+# M2 = get_cost_quad(x, y, delta, alpha)
+# find_sequence_iterative(M2, x, y, delta, alpha)
+# print 'alignment cost:', M2[len(x), len(y)]
+# print alignment
 
 # genarating multiple instances
-#for i in range(0, 1):
-#	for j in range(0, 10):
-#
-#		string_length = 10 * pow(2, i+1)
-#		
-#		x = [random.choice(alphabet) for _ in range(string_length)]
-#		y = [random.choice(alphabet) for _ in range(string_length)]
-#		
-#		M1 = get_cost_quad(x, y, delta, alpha)
-#		M2 = get_cost_linear(x, y, delta, alpha)
-#		find_sequence_iterative(M1, len(x), len(y), x, y, delta, alpha)
+for i in range(0, 5):
+	for j in range(0, 10):
 
-print(time.time() - start_time)
+		string_length = 10 * pow(2, i+1)
+		
+		x = [random.choice(alphabet) for _ in range(string_length)]
+		y = [random.choice(alphabet) for _ in range(string_length)]
+		
+		# linear storage
+		alignment = list()
+		M1 = get_cost_linear(x, y, delta, alpha)
+		divide_conquer_alignment(x, y, delta, alpha)
+
+		# quadratic storage
+		alignment = list()
+		M2 = get_cost_quad(x, y, delta, alpha)
+		find_sequence_iterative(M2, x, y, delta, alpha)
+
+		if M1[len(x)] != M2[len(x), len(y)]:
+			print 'error: costs are different'
+
+		del M1
+		del M2
+		del alignment
+
+	print 'i =', i+1, (time.time() - start_time)
