@@ -58,13 +58,15 @@ def get_cost_linear(x, y, delta, alpha):
 	return CURRENT
 
 # find sequence for quadratic storage: O(2n) time, O(n^2) space
-def find_sequence_iterative(M, i, j, x, y, delta, alpha):
+def find_sequence_iterative(M, x, y, delta, alpha):
+	i = len(x)
+	j = len(y)
 	while(i != 0 and j != 0):
 		mismatch = M[i-1, j-1]
 		if x[i-1] != y[j-1]:
 			mismatch = mismatch + alpha
 		if M[i, j] == mismatch:
-			#print(x[i-1], y[j-1])
+			print(x[i-1], y[j-1])
 			i = i-1
 			j = j-1
 		else:
@@ -82,17 +84,18 @@ def divide_conquer_alignment(x, y, delta, alpha):
 		find_sequence_iterative(M, x, y, delta, alpha)
 		return
 
-	f_alignment = get_cost_linear(x, y[:(n/2)], delta, alpha)[1:]
-	# problem is here, on backward alignment!
-	b_alignment = get_cost_linear(x, y[(n/2):], delta, alpha)[1:]
-	
-	sum_alignments = [a + b for a, b in zip(f_alignment, b_alignment)]
-	q = sum_alignments.index(min(sum_alignments))
-	
-	print(x[q], y[(n/2)-1])
+	else:
+		f_alignment = get_cost_linear(x, y[:(n/2)], delta, alpha)
+		b_alignment = get_cost_linear(x[::-1], y[(n/2):][::-1], delta, alpha)
+		
+		sum_alignments = [a + b for a, b in zip(f_alignment, b_alignment[::-1])]
+		q = sum_alignments.index(min(sum_alignments))
+		
+		if(q > 0):
+			print(x[q-1], y[(n/2)-1])
 
-	divide_conquer_alignment(x[:q], y[:(n/2)], delta, alpha)
-	divide_conquer_alignment(x[q:], y[(n/2):], delta, alpha)
+		divide_conquer_alignment(x[:q], y[:(n/2)], delta, alpha)
+		divide_conquer_alignment(x[q:], y[(n/2):], delta, alpha)
 
 
 delta = 0.7
@@ -102,8 +105,15 @@ alphabet = "abcd"
 x = "mean"
 y = "name"
 
-cost = get_cost_linear(x, y, delta, alpha)
-print cost
+M1 = get_cost_linear(x, y, delta, alpha)
+print 'alignment cost:', M1[len(x)]
+divide_conquer_alignment(x, y, delta, alpha)
+
+print '---------------------'
+
+M2 = get_cost_quad(x, y, delta, alpha)
+print 'alignment cost:', M2[len(x), len(y)]
+find_sequence_iterative(M2, x, y, delta, alpha)
 
 # genarating multiple instances
 #for i in range(0, 1):
