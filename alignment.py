@@ -27,6 +27,7 @@ def init_memory_linear(m, delta):
 def get_cost_quad(x, y, delta, alpha):
 	m = len(x)
 	n = len(y)
+
 	M = init_memory_quad(m+1, n+1, delta)
 	
 	for i in range(1, m+1):
@@ -61,6 +62,7 @@ def get_cost_linear(x, y, delta, alpha):
 def find_sequence_iterative(M, x, y, delta, alpha):
 	i = len(x)
 	j = len(y)
+	
 	while(i != 0 and j != 0):
 		mismatch = M[i-1, j-1]
 		if x[i-1] != y[j-1]:
@@ -79,6 +81,7 @@ def find_sequence_iterative(M, x, y, delta, alpha):
 def divide_conquer_alignment(x, y, delta, alpha):
 	m = len(x)
 	n = len(y)
+	
 	if m <= 2 or n <= 2:
 		M = get_cost_quad(x, y, delta, alpha)
 		return find_sequence_iterative(M, x, y, delta, alpha)
@@ -116,7 +119,9 @@ alphabet = "abcd"
 # print alignment
 
 # genarating multiple instances
-for i in range(0, 5):
+for i in range(0, 6):
+	times_linear = list()
+	times_quad = list()
 	for j in range(0, 10):
 
 		string_length = 10 * pow(2, i+1)
@@ -126,13 +131,17 @@ for i in range(0, 5):
 		
 		# linear storage
 		alignment = list()
+		st_linear = time.time()
 		M1 = get_cost_linear(x, y, delta, alpha)
 		divide_conquer_alignment(x, y, delta, alpha)
+		times_linear.append(time.time() - st_linear)
 
 		# quadratic storage
 		alignment = list()
+		st_quad = time.time()
 		M2 = get_cost_quad(x, y, delta, alpha)
 		find_sequence_iterative(M2, x, y, delta, alpha)
+		times_quad.append(time.time() - st_quad)
 
 		if M1[len(x)] != M2[len(x), len(y)]:
 			print 'error: costs are different'
@@ -141,4 +150,7 @@ for i in range(0, 5):
 		del M2
 		del alignment
 
-	print 'i =', i+1, (time.time() - start_time)
+	print 'i =', i+1, sum(times_linear)/len(times_linear), sum(times_quad)/len(times_quad), (time.time() - start_time)
+	
+	del times_linear
+	del times_quad
