@@ -118,14 +118,20 @@ alphabet = "abcd"
 # print 'alignment cost:', M2[len(x), len(y)]
 # print alignment
 
+mean_times_linear = list()
+mean_times_quad = list()
+length_list = list()
+
 # genarating multiple instances
-for i in range(0, 6):
+for i in range(0, 11):
+	
 	times_linear = list()
 	times_quad = list()
+
 	for j in range(0, 10):
 
 		string_length = 10 * pow(2, i+1)
-		
+
 		x = [random.choice(alphabet) for _ in range(string_length)]
 		y = [random.choice(alphabet) for _ in range(string_length)]
 		
@@ -152,5 +158,11 @@ for i in range(0, 6):
 
 	print 'i =', i+1, sum(times_linear)/len(times_linear), sum(times_quad)/len(times_quad), (time.time() - start_time)
 	
+	mean_times_linear.append(sum(times_linear)/len(times_linear))
+	mean_times_quad.append(sum(times_quad)/len(times_quad))
+	length_list.append(string_length)
+
 	del times_linear
 	del times_quad
+
+print mean_times_linear, mean_times_quad, length_list
