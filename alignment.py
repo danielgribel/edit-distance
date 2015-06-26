@@ -81,7 +81,7 @@ def find_sequence_iterative(M, x, y, delta, alpha):
 def divide_conquer_alignment(x, y, delta, alpha):
 	m = len(x)
 	n = len(y)
-	
+
 	if m <= 2 or n <= 2:
 		M = get_cost_quad(x, y, delta, alpha)
 		return find_sequence_iterative(M, x, y, delta, alpha)
@@ -96,73 +96,62 @@ def divide_conquer_alignment(x, y, delta, alpha):
 		divide_conquer_alignment(x[:q], y[:(n/2)], delta, alpha)
 		divide_conquer_alignment(x[q:], y[(n/2):], delta, alpha)
 
-
 delta = 0.7
 alpha = 1
 alphabet = "abcd"
 
-# x = "mean"
-# y = "name"
+# uncomment @profile for memory consumption measurement.
+# to run: 'mprof run alignment.py' -- memory_profiler module required
+#@profile
+def main():
+	mean_times_linear = list()
+	mean_times_quad = list()
+	length_list = list()
 
-# alignment = list()
-# M1 = get_cost_linear(x, y, delta, alpha)
-# divide_conquer_alignment(x, y, delta, alpha)
-# print 'alignment cost:', M1[len(x)]
-# print alignment
-
-# print '---------------------'
-
-# alignment = list()
-# M2 = get_cost_quad(x, y, delta, alpha)
-# find_sequence_iterative(M2, x, y, delta, alpha)
-# print 'alignment cost:', M2[len(x), len(y)]
-# print alignment
-
-mean_times_linear = list()
-mean_times_quad = list()
-length_list = list()
-
-# genarating multiple instances
-for i in range(0, 11):
-	
-	times_linear = list()
-	times_quad = list()
-
-	for j in range(0, 10):
-
-		string_length = 10 * pow(2, i+1)
-
-		x = [random.choice(alphabet) for _ in range(string_length)]
-		y = [random.choice(alphabet) for _ in range(string_length)]
+	# genarating multiple instances
+	for i in range(0, 11):
 		
-		# linear storage
-		alignment = list()
-		st_linear = time.time()
-		M1 = get_cost_linear(x, y, delta, alpha)
-		divide_conquer_alignment(x, y, delta, alpha)
-		times_linear.append(time.time() - st_linear)
+		times_linear = list()
+		times_quad = list()
 
-		# quadratic storage
-		alignment = list()
-		st_quad = time.time()
-		M2 = get_cost_quad(x, y, delta, alpha)
-		find_sequence_iterative(M2, x, y, delta, alpha)
-		times_quad.append(time.time() - st_quad)
+		for j in range(0, 10):
 
-		if M1[len(x)] != M2[len(x), len(y)]:
-			print 'error: costs are different'
+			string_length = 10 * pow(2, i+1)
 
-		del M1
-		del M2
-		del alignment
+			x = [random.choice(alphabet) for _ in range(string_length)]
+			y = [random.choice(alphabet) for _ in range(string_length)]
+			
+			# linear storage
+			alignment = list()
+			st_linear = time.time()
+			M1 = get_cost_linear(x, y, delta, alpha)
+			divide_conquer_alignment(x, y, delta, alpha)
+			times_linear.append(time.time() - st_linear)
 
-	print 'i =', i+1, sum(times_linear)/len(times_linear), sum(times_quad)/len(times_quad), (time.time() - start_time)
-	
-	mean_times_linear.append(sum(times_linear)/len(times_linear))
-	mean_times_quad.append(sum(times_quad)/len(times_quad))
-	length_list.append(string_length)
+			# quadratic storage
+			alignment = list()
+			st_quad = time.time()
+			M2 = get_cost_quad(x, y, delta, alpha)
+			find_sequence_iterative(M2, x, y, delta, alpha)
+			times_quad.append(time.time() - st_quad)
 
-	del times_linear
-	del times_quad
+			if M1[len(x)] != M2[len(x), len(y)]:
+				print 'error: costs are different'
 
-print mean_times_linear, mean_times_quad, length_list
+			del M1
+			del M2
+			del alignment
+
+		print 'i =', i+1, sum(times_linear)/len(times_linear), sum(times_quad)/len(times_quad), (time.time() - start_time)
+		
+		mean_times_linear.append(sum(times_linear)/len(times_linear))
+		mean_times_quad.append(sum(times_quad)/len(times_quad))
+		length_list.append(string_length)
+
+		del times_linear
+		del times_quad
+
+	print mean_times_linear, mean_times_quad, length_list
+
+alignment = list()
+main()
